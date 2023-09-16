@@ -15,6 +15,8 @@ import Card from '../Card/Card'
 const Home =()=>{
   const [movies, setMovies]= useState([])
   const [movieData, setMovieData]= useState([])
+  const [error, setError]= useState(null)
+  const [loading,setLoading]=useState(false)
     //const API_KEY='5e85b3031c206b402313074754be8bae'//https://api.themoviedb.org/3/movie/top_rated// 
    
    // Define a mapping of genre IDs to names
@@ -27,10 +29,14 @@ const Home =()=>{
 
 
 const fetchMovie= async ()=>{
-
+    setLoading(true)
+   try{
     const data = await fetch(`https://api.themoviedb.org/3/movie/top_rated?api_key=5e85b3031c206b402313074754be8bae`);
-    const datajson= await data.json();
- 
+  if(!data.ok){
+     throw  new Error('Something went wrong!')
+  }
+  const datajson= await data.json();
+
    const  movie1= datajson.results.map((data, index)=>{
   if(index<10){ return data}
   else{
@@ -44,7 +50,15 @@ const fetchMovie= async ()=>{
 setMovieData(()=>{
     return [...datajson.results]
 })
-console.log(datajson.results)
+setLoading(false)
+
+   }
+   catch(error){
+    setError(error.message)
+  console.log(error.message)
+  setLoading(false)
+
+   }
 }
 useEffect(()=>{
     fetchMovie()
@@ -80,7 +94,9 @@ const SeeMore1=()=>{
             })
  }
 return <React.Fragment>
-<header className={classes.header} style={{backgroundImage:`url(${str})`}}>
+{loading&&<p className='loading'>Loading...</p>}
+{!loading && error&& <p className='error'>{error}</p>}
+{!loading&&!error&&<div><header className={classes.header} style={{backgroundImage:`url(${str})`}}>
 <div className={classes.div1}>
 <img src={logo} alt='logo' className={classes.img}/>
 <p className={classes.p}>{title}</p>
@@ -127,7 +143,7 @@ WATCH TRAILER
    {
    movies.map((data, index)=>{
     if(data===''){
-        return
+        return 
     }
     else{
         return <Card key={index} voteavg={data['vote_average']} id={data.id} genreid1={genreMap[data.genre_ids[0]]} genreid2={genreMap[data.genre_ids[1]]}  posterPath={data['poster_path']} title={data.title} overview={data.overview} releaseDate={data['release_date']}/>
@@ -157,6 +173,7 @@ WATCH TRAILER
 </div>
 <p className={classes.footerp1}>© 2021 MovieBox by Adriana Eka Prayudha</p>
 </footer>
+</div>}
     </React.Fragment>
 }
 export default Home

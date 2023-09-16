@@ -19,6 +19,7 @@ const Movie = () => {
   const [director, setDirector]= useState({})
   const [writers, setWriters]=useState([])
   const [loading, setLoading]= useState(true)
+  const [error,setError]= useState(null)
 const API_KEY='5e85b3031c206b402313074754be8bae'
 const id= params.id
 const API_URL=`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&append_to_response=credits`
@@ -26,7 +27,11 @@ const API_URL=`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&appen
  const fetchDetails= async()=>{
   setLoading(true)
 
-  const data = await fetch(`${API_URL}`);
+  try{
+    const data = await fetch(`${API_URL}`);
+    if(!data.ok){
+      throw new Error('Something went wrong')
+    }
     const datajson= await data.json();
     const dataj= JSON.stringify(datajson)
     localStorage.setItem( 'car',dataj)
@@ -34,7 +39,6 @@ const API_URL=`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&appen
       return val={...datajson}
      })
   const direct=arr.credits.crew.filter((data)=>{return data.job==='Director' })
-
     const direct1=datajson.credits.crew.filter((data)=>{return data.known_for_department==='Writing' })
    setDirector(()=>{
     return [...direct]
@@ -42,12 +46,14 @@ const API_URL=`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&appen
    setWriters(()=>{
     return [...direct1]
    })
-    console.log(direct1)
+    setLoading(false)
+  }
+  catch(error){
+    setError(error.message)
+    setLoading(false)
 
 
-   console.log(datajson,direct,datajson.genres[0].name)
-    console.log(arr)
-    setLoading(!data.ok)
+  }
  }
 
 
@@ -55,8 +61,8 @@ const API_URL=`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&appen
    fetchDetails()
  },[])
 
- const str= 'https://image.tmdb.org/t/p/original'+arr.backdrop_path
- const str1 ='https://image.tmdb.org/t/p/original'+arr.poster_path//belongs_to_collection
+ const str= arr.backdrop_path?'https://image.tmdb.org/t/p/original'+arr.backdrop_path:dark
+ const str1 =arr.poster_path?'https://image.tmdb.org/t/p/original'+arr.poster_path:dark//belongs_to_collection
  const str2= arr.belongs_to_collection?'https://image.tmdb.org/t/p/original'+arr.belongs_to_collection.poster_path:dark//
  const str3= arr.belongs_to_collection?'https://image.tmdb.org/t/p/original'+arr.belongs_to_collection.backdrop_path:dark//
 
@@ -64,8 +70,9 @@ const API_URL=`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&appen
 
   return (
     <React.Fragment>
-      {loading&&<p className={classes.loading}>loading...</p>}
-      {  !loading&& <section className={classes.sec}>
+      {loading&&<p className='loading'>Loading...</p>}
+    {!loading && error&& <p className='error'>{error}</p>}
+      {  !loading&& !error&&<section className={classes.sec}>
         <div className={classes.div1}>
           <div className={classes.flex}>
           <Link to='/home'>
