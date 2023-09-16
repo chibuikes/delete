@@ -13,8 +13,17 @@ const params= useParams()
    <Routes>
     <Route path='/' element={<Home/>}/>
     <Route path='/home' element={<Home/>}/>
+<<<<<<< HEAD
     <Route path='/movie/:id' element={<Movie key={params.id}/>}/>
     <Route path='*' element={<Home/>}/>
+=======
+    <Route path='/movie/:id' element={<Movie/>}/>
+    <Route path='*' element={<Home/>}/>
+  
+  
+
+
+>>>>>>> 3a4aa5dc0b40fb1b0c75fa8c6def0585a1cf3fbf
    </Routes>
    </Suspense>
   
